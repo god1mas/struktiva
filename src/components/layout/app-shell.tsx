@@ -11,12 +11,24 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
           <Link href="/" aria-label="Struktiva beranda">
             <BrandMark />
           </Link>
-          <nav aria-label="Navigasi utama">
+          <nav aria-label="Navigasi utama" className="flex flex-wrap justify-end gap-1">
+            <Link
+              href="/learn/linked-list"
+              className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-blue-700"
+            >
+              Belajar
+            </Link>
             <Link
               href="/visualizer/linked-list"
               className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-blue-700"
             >
               Linked List
+            </Link>
+            <Link
+              href="/progress"
+              className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-blue-700"
+            >
+              Progress
             </Link>
           </nav>
         </div>

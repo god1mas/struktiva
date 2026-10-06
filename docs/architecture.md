@@ -67,3 +67,21 @@ The `/visualizer/linked-list` route remains a Server Component entry point and
 introduces a narrow Client Component boundary for the interactive visualizer.
 Visualizer sessions are transient; Phase 6 adds no database schema, migration,
 or persistence behavior.
+
+## Learning and quiz infrastructure
+
+Phase 7 follows a separate one-way dependency path:
+
+`Content Definition -> Pure Learning Logic -> Server Service -> Database Repository -> UI`
+
+Module and lesson metadata plus canonical quiz definitions are source-controlled.
+Pure progress derivation and quiz scoring do not import Next.js, Better Auth, or
+Prisma. Server adapters validate the Better Auth session and bind testable
+service factories to Prisma. Client payloads never select a user or score, and
+the public quiz representation excludes correct answers and explanations until
+the server grades a complete submission.
+
+Progress percentages are derived rather than persisted. Database writes contain
+only user progress and quiz history; static prompts, option labels, answer keys,
+and explanations are not stored. Guests use the same learning UI without a
+database identity or persistent history.

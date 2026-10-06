@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { CodePanel } from "../../components/code-panel";
 import { PlaybackControls } from "../../components/playback-controls";
 import { StepExplanation } from "../../components/step-explanation";
@@ -162,6 +163,14 @@ export function LinkedListVisualizer() {
           Pelajari Singly Linked List: amati HEAD, pointer next, dan identitas
           setiap node saat struktur berubah satu langkah pada satu waktu.
         </p>
+        <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold">
+          <Link href="/learn/linked-list" className="text-blue-700 hover:underline">
+            Lihat kurikulum
+          </Link>
+          <Link href="/learn/linked-list/quiz" className="text-blue-700 hover:underline">
+            Kerjakan quiz →
+          </Link>
+        </div>
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(22rem,0.8fr)]">

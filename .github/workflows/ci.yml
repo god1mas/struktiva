@@ -11,6 +11,20 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: struktiva_ci
+          POSTGRES_USER: struktiva_ci
+          POSTGRES_PASSWORD: struktiva_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U struktiva_ci -d struktiva_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DATABASE_URL: postgresql://struktiva_ci:struktiva_ci@localhost:5432/struktiva_ci
       BETTER_AUTH_SECRET: ci-only-placeholder-secret-at-least-32-characters
@@ -34,5 +48,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate and generate Prisma
+        run: |
+          pnpm prisma:validate
+          pnpm prisma:generate
+
+      - name: Apply existing migrations
+        run: pnpm exec prisma migrate deploy --config prisma7.config.ts
+
+      - name: Run database and learning smoke checks
+        run: |
+          pnpm db:smoke
+          pnpm auth:smoke
+          pnpm learning:smoke
+
       - name: Verify
         run: pnpm verify
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run end-to-end tests
+        run: pnpm test:e2e

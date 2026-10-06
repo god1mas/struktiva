@@ -15,8 +15,10 @@
     "postinstall": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
+    "prisma:migrate:status": "prisma migrate status --config prisma7.config.ts",
     "db:smoke": "tsx scripts/db-smoke.ts",
-    "auth:smoke": "tsx scripts/auth-smoke.ts"
+    "auth:smoke": "tsx scripts/auth-smoke.ts",
+    "learning:smoke": "tsx scripts/learning-smoke.ts"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.7.7",
