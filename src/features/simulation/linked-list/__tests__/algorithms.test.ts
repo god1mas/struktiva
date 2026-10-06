@@ -55,6 +55,23 @@ describe("traversal and search", () => {
     expect(trace.frames[0]?.explanation).toMatch(/HEAD bernilai NULL/);
   });
 
+  it("traverses a one-node list and reaches NULL", () => {
+    const trace = simulateTraversal({ state: createLinkedListState([12]) });
+
+    expect(trace.frames.some((frame) => frame.title === "Kunjungi node 0")).toBe(true);
+    expect(trace.frames.at(-1)?.explanation).toContain("1 node");
+  });
+
+  it("visits duplicate values as separate nodes", () => {
+    const state = createLinkedListState([5, 5, 5]);
+    const trace = simulateTraversal({ state });
+    const activeIds = trace.frames
+      .filter((frame) => frame.title.startsWith("Kunjungi node"))
+      .map((frame) => frame.visualState.find((entry) => entry.state === "active")?.elementId);
+
+    expect(new Set(activeIds).size).toBe(3);
+  });
+
   it("stops search at the first duplicate match", () => {
     const state = createLinkedListState([4, 8, 8]);
     const trace = simulateSearch({ state, value: 8 });
@@ -65,10 +82,30 @@ describe("traversal and search", () => {
     );
   });
 
+  it.each([
+    { target: 4, index: 0 },
+    { target: 8, index: 1 },
+    { target: 12, index: 2 },
+  ])("finds $target at list index $index", ({ target, index }) => {
+    const state = createLinkedListState([4, 8, 12]);
+    const trace = simulateSearch({ state, value: target });
+    const found = trace.frames.at(-1)?.visualState.find(
+      (entry) => entry.state === "found",
+    );
+
+    expect(found?.elementId).toBe(getOrderedNodes(state)[index]?.id);
+  });
+
   it("ends at NULL when search misses", () => {
     const trace = simulateSearch({ state: createLinkedListState([1, 2]), value: 9 });
 
     expect(trace.frames.at(-1)?.title).toBe("Target tidak ditemukan");
+  });
+
+  it("rejects a search target outside the value range", () => {
+    expect(() =>
+      simulateSearch({ state: createLinkedListState([1]), value: 1000 }),
+    ).toThrow();
   });
 });
 
@@ -82,6 +119,21 @@ describe("insert operations", () => {
     expect(linkedListValues(result)).toEqual([5, 10, 20]);
     expect(getOrderedNodes(result).slice(1).map((node) => node.id)).toEqual(originalIds);
     expect(trace.frames.some((frame) => frame.state.temporaryNodeIds.length === 1)).toBe(true);
+  });
+
+  it("inserts a duplicate value at the head of an empty or populated list", () => {
+    const emptyResult = finalState(
+      simulateInsertHead({ state: createLinkedListState([]), value: 7 }),
+    );
+    const duplicateResult = finalState(
+      simulateInsertHead({ state: createLinkedListState([7]), value: 7 }),
+    );
+
+    expect(linkedListValues(emptyResult)).toEqual([7]);
+    expect(linkedListValues(duplicateResult)).toEqual([7, 7]);
+    expect(getOrderedNodes(duplicateResult)[0]?.id).not.toBe(
+      getOrderedNodes(duplicateResult)[1]?.id,
+    );
   });
 
   it("inserts at the tail of a non-empty list", () => {
@@ -127,10 +179,31 @@ describe("insert operations", () => {
     ).toThrow("Posisi sisip harus berada di antara 0 dan 2");
   });
 
+  it("rejects a negative insert position with actionable feedback", () => {
+    expect(() =>
+      simulateInsertPosition({
+        state: createLinkedListState([1, 2]),
+        value: 9,
+        position: -1,
+      }),
+    ).toThrow("Posisi sisip harus berada di antara 0 dan 2");
+  });
+
   it("rejects insertion when the ten-node limit is reached", () => {
     const full = createLinkedListState(Array.from({ length: 10 }, (_, index) => index));
 
     expect(() => simulateInsertHead({ state: full, value: 11 })).toThrow(/batas 10/);
+    expect(() => simulateInsertTail({ state: full, value: 11 })).toThrow(/batas 10/);
+    expect(() =>
+      simulateInsertPosition({ state: full, value: 11, position: 5 }),
+    ).toThrow(/batas 10/);
+  });
+
+  it("allows the tail insertion that reaches exactly ten nodes", () => {
+    const state = createLinkedListState(Array.from({ length: 9 }, (_, index) => index));
+    const result = finalState(simulateInsertTail({ state, value: 9 }));
+
+    expect(getOrderedNodes(result)).toHaveLength(10);
   });
 });
 
@@ -189,5 +262,31 @@ describe("delete operations", () => {
     expect(() =>
       simulateDeletePosition({ state: createLinkedListState([1, 2]), position: 2 }),
     ).toThrow("Posisi hapus harus berada di antara 0 dan 1");
+  });
+
+  it("rejects a negative delete position", () => {
+    expect(() =>
+      simulateDeletePosition({ state: createLinkedListState([1, 2]), position: -1 }),
+    ).toThrow("Posisi hapus harus berada di antara 0 dan 1");
+  });
+});
+
+describe("trace invariants", () => {
+  it("does not mutate its input and emits unique frame IDs with known code IDs", () => {
+    const state = createLinkedListState([10, 20, 30]);
+    const before = JSON.stringify(state);
+    const trace = simulateInsertPosition({ state, value: 15, position: 1 });
+    const frameIds = trace.frames.map((frame) => frame.id);
+    const cppIds = new Set(
+      trace.frames.flatMap((frame) => frame.activeCppLineIds),
+    );
+    const pseudocodeIds = new Set(
+      trace.frames.flatMap((frame) => frame.activePseudocodeLineIds),
+    );
+
+    expect(JSON.stringify(state)).toBe(before);
+    expect(new Set(frameIds).size).toBe(frameIds.length);
+    expect(cppIds.size).toBeGreaterThan(0);
+    expect(pseudocodeIds.size).toBeGreaterThan(0);
   });
 });

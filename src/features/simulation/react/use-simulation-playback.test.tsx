@@ -50,4 +50,32 @@ describe("useSimulationPlayback", () => {
     expect(screen.getByTestId("index")).toHaveTextContent("0");
     expect(screen.getByTestId("status")).toHaveTextContent("idle");
   });
+
+  it("cleans the scheduled timer when unmounted", () => {
+    vi.useFakeTimers();
+    const clearTimer = vi.spyOn(window, "clearTimeout");
+    const view = render(<Harness />);
+
+    fireEvent.click(screen.getByRole("button", { name: "play" }));
+    view.unmount();
+
+    expect(clearTimer).toHaveBeenCalled();
+    clearTimer.mockRestore();
+  });
+
+  it("stays completed at the final frame instead of restarting", () => {
+    vi.useFakeTimers();
+    render(<Harness />);
+
+    fireEvent.click(screen.getByRole("button", { name: "play" }));
+    for (let step = 0; step < 4; step += 1) {
+      act(() => vi.advanceTimersByTime(BASE_PLAYBACK_DELAY_MS));
+    }
+    const finalIndex = screen.getByTestId("index").textContent;
+
+    expect(screen.getByTestId("status")).toHaveTextContent("completed");
+    act(() => vi.advanceTimersByTime(BASE_PLAYBACK_DELAY_MS * 10));
+    expect(screen.getByTestId("index")).toHaveTextContent(finalIndex ?? "");
+    expect(screen.getByTestId("status")).toHaveTextContent("completed");
+  });
 });

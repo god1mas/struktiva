@@ -43,10 +43,10 @@ export const valueInputSchema = stateInputSchema.extend({
   value: z.number().int().min(LINKED_LIST_MIN_VALUE).max(LINKED_LIST_MAX_VALUE),
 });
 export const positionInputSchema = stateInputSchema.extend({
-  position: z.number().int().nonnegative(),
+  position: z.number().int(),
 });
 export const valuePositionInputSchema = valueInputSchema.extend({
-  position: z.number().int().nonnegative(),
+  position: z.number().int(),
 });
 
 export class LinkedListInputError extends Error {

@@ -156,11 +156,11 @@ export function LinkedListVisualizer() {
           Reference visualizer
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-          Singly Linked List
+          Linked List Visualizer
         </h1>
         <p className="mt-3 leading-7 text-slate-600">
-          Amati HEAD, pointer next, dan identitas setiap node saat struktur berubah
-          satu langkah pada satu waktu.
+          Pelajari Singly Linked List: amati HEAD, pointer next, dan identitas
+          setiap node saat struktur berubah satu langkah pada satu waktu.
         </p>
       </header>
 

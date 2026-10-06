@@ -23,7 +23,7 @@ test("completes the linked-list insert, restart, search, and validation flow", a
   const response = await page.goto("/visualizer/linked-list");
 
   expect(response?.ok()).toBe(true);
-  await expect(page.getByRole("heading", { name: "Singly Linked List" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Linked List Visualizer" })).toBeVisible();
   await expect(page.locator('[data-node-value="10"]')).toBeVisible();
 
   await page.getByLabel("Nilai (-99 sampai 999)").fill("5");
@@ -35,6 +35,10 @@ test("completes the linked-list insert, restart, search, and validation flow", a
   await expect(page.locator('[data-node-value="5"]')).toHaveAttribute(
     "data-visual-state",
     "new",
+  );
+  await page.getByRole("button", { name: "Langkah berikutnya" }).click();
+  await expect(page.locator('[data-active="true"]')).toContainText(
+    "fresh.next ← HEAD",
   );
   await advanceToEnd(page);
   await expect(page.locator('[data-node-value="5"]')).toBeVisible();
@@ -67,7 +71,7 @@ test("fits a 390 by 844 viewport without page-level horizontal overflow", async 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/visualizer/linked-list");
 
-  await expect(page.getByRole("heading", { name: "Singly Linked List" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Linked List Visualizer" })).toBeVisible();
   await page.getByRole("button", { name: "Memori" }).click();
   await expect(page.getByText("Alamat simulasi: 0xA100")).toBeVisible();
 
