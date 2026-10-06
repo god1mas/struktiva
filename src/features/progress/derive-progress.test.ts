@@ -5,13 +5,14 @@ import { deriveModuleLearningProgress } from "./derive-progress";
 function derive(
   completedSlugs: readonly string[],
   options: {
+    readonly moduleSlug?: string;
     readonly startedSlugs?: readonly string[];
     readonly scores?: readonly number[];
     readonly lastLessonSlug?: string | null;
   } = {},
 ) {
   return deriveModuleLearningProgress({
-    moduleSlug: "linked-list",
+    moduleSlug: options.moduleSlug ?? "linked-list",
     lessonProgress: [
       ...completedSlugs.map((lessonSlug) => ({
         lessonSlug,
@@ -68,5 +69,37 @@ describe("progress derivation", () => {
     expect(result.lastLessonTitle).toBe("Pointer & Next");
     expect(result.bestQuizScore).toBe(90);
     expect(result.quizAttemptCount).toBe(3);
+  });
+
+  it("keeps Array progress and quiz history independent from Linked List", () => {
+    const arrayLessons = getOrderedLessons("array").map((lesson) => lesson.slug);
+    const empty = derive([], { moduleSlug: "array" });
+    const partial = derive(arrayLessons.slice(0, 3), {
+      moduleSlug: "array",
+      scores: [40, 80],
+      lastLessonSlug: "contiguous-memory",
+    });
+    const completed = derive(arrayLessons, { moduleSlug: "array", scores: [90] });
+
+    expect(empty).toMatchObject({ moduleSlug: "array", percentage: 0, status: "not-started" });
+    expect(partial).toMatchObject({
+      moduleSlug: "array",
+      completedLessonCount: 3,
+      totalLessonCount: 12,
+      percentage: 25,
+      bestQuizScore: 80,
+      quizAttemptCount: 2,
+      lastLessonSlug: "contiguous-memory",
+    });
+    expect(completed).toMatchObject({ percentage: 100, status: "completed" });
+
+    const linkedList = derive(["node"], { scores: [70] });
+    expect(linkedList).toMatchObject({
+      moduleSlug: "linked-list",
+      completedLessonCount: 1,
+      totalLessonCount: 18,
+      bestQuizScore: 70,
+      quizAttemptCount: 1,
+    });
   });
 });

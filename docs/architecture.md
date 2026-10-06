@@ -85,3 +85,17 @@ Progress percentages are derived rather than persisted. Database writes contain
 only user progress and quiz history; static prompts, option labels, answer keys,
 and explanations are not stored. Guests use the same learning UI without a
 database identity or persistent history.
+
+## Array module boundary
+
+The Phase 8 Array domain lives in `src/features/simulation/array` and follows
+the existing simulation dependency direction. Pure algorithms model stable
+element identity, ordered logical items, and explicit transition placements for
+right/left shifting. The renderer consumes those snapshots and adds only DOM,
+Motion layout, and accessible presentation.
+
+The module reuses the shared React playback adapter, playback controls, code
+panel, explanation component, content registry, quiz runner, and progress
+services. Its conceptual contiguous addresses are derived from the visible
+index and clearly labeled as simulated. Array content is source-controlled;
+Phase 8 adds no database schema or migration.

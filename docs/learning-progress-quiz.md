@@ -1,10 +1,10 @@
 # Learning Progress and Quiz Infrastructure
 
 Phase 7 adds reusable learning metadata, progress persistence, and secure quiz
-submission. Linked List is the only registered reference module; its manifest
-contains 18 stable lesson slugs grouped into Fundamentals, Traversal, Insertion,
-Deletion, Performance, and Final chapters. Static lesson and quiz content stays
-in source control rather than the database.
+submission. Linked List and Array are registered learning modules. Their
+manifests contain 18 and 12 stable lesson slugs respectively, grouped into
+module-specific chapters. Static lesson and quiz content stays in source
+control rather than the database.
 
 ## Content and progress
 

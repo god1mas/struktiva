@@ -8,11 +8,15 @@ import {
 } from "./index";
 
 describe("learning content registry", () => {
-  it("registers only the Linked List reference module with 18 ordered lessons", () => {
-    expect(getRegisteredModules().map((module) => module.slug)).toEqual(["linked-list"]);
+  it("registers Linked List and Array with deterministic lesson ordering", () => {
+    expect(getRegisteredModules().map((module) => module.slug)).toEqual(["linked-list", "array"]);
     expect(getLessonCount("linked-list")).toBe(18);
+    expect(getLessonCount("array")).toBe(12);
     expect(getOrderedLessons("linked-list").map((lesson) => lesson.order)).toEqual(
       Array.from({ length: 18 }, (_, index) => index + 1),
+    );
+    expect(getOrderedLessons("array").map((lesson) => lesson.order)).toEqual(
+      Array.from({ length: 12 }, (_, index) => index + 1),
     );
   });
 
@@ -26,6 +30,7 @@ describe("learning content registry", () => {
     expect(new Set(moduleSlugs).size).toBe(moduleSlugs.length);
     expect(new Set(lessonSlugs).size).toBe(lessonSlugs.length);
     expect(getLessonDefinition("linked-list", "pointer-and-next").order).toBe(3);
+    expect(getLessonDefinition("array", "contiguous-memory").order).toBe(3);
   });
 
   it("fails clearly for unknown modules and lessons", () => {

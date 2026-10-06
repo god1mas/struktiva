@@ -8,7 +8,7 @@
 - Phase 5 — Simulation Core: PASS
 - Phase 6 — Linked List Reference Module: PASS
 - Phase 7 — Learning Progress & Quiz Infrastructure: PASS
-- Phase 8 — Array Module: PLANNED
+- Phase 8 — Array Module: PASS
 - Phase 9 — Stack Module: PLANNED
 - Phase 10 — Queue Module: PLANNED
 - Phase 11 — Searching Module: PLANNED

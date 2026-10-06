@@ -1,7 +1,8 @@
+import { arrayModule } from "./modules/array";
 import { linkedListModule } from "./modules/linked-list";
 import { ContentNotFoundError, type LessonDefinition, type ModuleDefinition } from "./types";
 
-const modules = [linkedListModule] as const;
+const modules = [linkedListModule, arrayModule] as const;
 
 export function getRegisteredModules(): readonly ModuleDefinition[] {
   return modules;

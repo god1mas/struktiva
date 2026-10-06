@@ -25,6 +25,12 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
               Linked List
             </Link>
             <Link
+              href="/visualizer/array"
+              className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-blue-700"
+            >
+              Array
+            </Link>
+            <Link
               href="/progress"
               className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-blue-700"
             >

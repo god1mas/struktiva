@@ -1,9 +1,11 @@
 import "dotenv/config";
 
+import { arrayQuiz } from "../src/content/quizzes/array";
 import { linkedListQuiz } from "../src/content/quizzes/linked-list";
 import { createProgressService } from "../src/features/progress/server/progress-service-core";
 import { createQuizPersistence } from "../src/features/quiz/server/quiz-persistence-core";
 import { createQuizSubmissionHandler } from "../src/features/quiz/server/submission-handler";
+import type { CanonicalQuiz } from "../src/features/quiz/types";
 import { prisma } from "../src/lib/prisma";
 
 const fixtureEmail = "phase7-smoke@struktiva.local";
@@ -11,12 +13,12 @@ const fixtureUserId = "phase7-learning-smoke-user";
 const progressService = createProgressService(prisma);
 const persistAttempt = createQuizPersistence(prisma);
 
-function quizRequest() {
-  return new Request("http://localhost/api/learning/quiz/linked-list/submit", {
+function quizRequest(quiz: CanonicalQuiz) {
+  return new Request(`http://localhost/api/learning/quiz/${quiz.moduleSlug}/submit`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      answers: linkedListQuiz.questions.map((question) => ({
+      answers: quiz.questions.map((question) => ({
         questionId: question.id,
         selectedOptionId: question.correctOptionId,
       })),
@@ -51,11 +53,18 @@ async function main() {
   });
   if (moduleCount !== 1) throw new Error("Module progress was not created exactly once.");
 
+  await progressService.startLesson(fixtureUserId, "array", "index-and-element");
+  await progressService.completeLesson(fixtureUserId, "array", "index-and-element");
+  const arrayLessonCount = await prisma.lessonProgress.count({
+    where: { userId: fixtureUserId, moduleSlug: "array", lessonSlug: "index-and-element" },
+  });
+  if (arrayLessonCount !== 1) throw new Error("Array lesson progress was not persisted independently.");
+
   const guestHandler = createQuizSubmissionHandler({
     getAuthenticatedUserId: async () => null,
     persistAttempt,
   });
-  const guestResponse = await guestHandler(quizRequest(), "linked-list");
+  const guestResponse = await guestHandler(quizRequest(arrayQuiz), "array");
   const guestAttemptCount = await prisma.quizAttempt.count({
     where: { userId: fixtureUserId },
   });
@@ -67,9 +76,9 @@ async function main() {
     getAuthenticatedUserId: async () => fixtureUserId,
     persistAttempt,
   });
-  const authenticatedResponse = await authenticatedHandler(quizRequest(), "linked-list");
+  const authenticatedResponse = await authenticatedHandler(quizRequest(linkedListQuiz), "linked-list");
   if (!authenticatedResponse.ok) throw new Error("Authenticated quiz submission failed.");
-  const retakeResponse = await authenticatedHandler(quizRequest(), "linked-list");
+  const retakeResponse = await authenticatedHandler(quizRequest(linkedListQuiz), "linked-list");
   if (!retakeResponse.ok) throw new Error("Authenticated quiz retake failed.");
   const attempts = await prisma.quizAttempt.findMany({
     where: { userId: fixtureUserId, moduleSlug: "linked-list" },
@@ -81,12 +90,36 @@ async function main() {
   ) {
     throw new Error("Quiz retake did not preserve two complete attempts.");
   }
+  const arrayResponse = await authenticatedHandler(quizRequest(arrayQuiz), "array");
+  if (!arrayResponse.ok) throw new Error("Authenticated Array quiz submission failed.");
+  const arrayAttempts = await prisma.quizAttempt.findMany({
+    where: { userId: fixtureUserId, moduleSlug: "array" },
+    include: { answers: true },
+  });
+  if (
+    arrayAttempts.length !== 1 ||
+    arrayAttempts[0]!.answers.length !== arrayQuiz.questions.length
+  ) {
+    throw new Error("Array quiz history was not persisted independently.");
+  }
   const summary = await progressService.getModuleLearningProgress(
     fixtureUserId,
     "linked-list",
   );
   if (summary.bestQuizScore !== 100 || summary.quizAttemptCount !== 2) {
     throw new Error("Derived quiz summary is incorrect.");
+  }
+  const arraySummary = await progressService.getModuleLearningProgress(
+    fixtureUserId,
+    "array",
+  );
+  if (
+    arraySummary.completedLessonCount !== 1 ||
+    arraySummary.totalLessonCount !== 12 ||
+    arraySummary.bestQuizScore !== 100 ||
+    arraySummary.quizAttemptCount !== 1
+  ) {
+    throw new Error("Derived Array progress or quiz summary is incorrect.");
   }
   console.log("Learning progress and quiz smoke check passed.");
 }
