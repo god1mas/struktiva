@@ -2,7 +2,9 @@
 
 Interactive Data Structures Learning Platform.
 
-This repository currently contains the Phase 4 project foundation only. Product scope and architecture decisions are canonical in [`docs/`](./docs/).
+The repository includes the shared deterministic simulation core and the
+[Singly Linked List reference visualizer](./docs/linked-list-reference.md).
+Product scope and architecture decisions are canonical in [`docs/`](./docs/).
 
 ## Local setup
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { site } from "@/lib/site";
 
 export default function Home() {
@@ -13,6 +14,12 @@ export default function Home() {
         <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-slate-600">
           {site.foundationMessage}
         </p>
+        <Link
+          href="/visualizer/linked-list"
+          className="mt-8 inline-flex rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800"
+        >
+          Buka visualizer Linked List
+        </Link>
       </section>
     </main>
   );

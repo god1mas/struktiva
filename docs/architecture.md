@@ -47,3 +47,23 @@ The reusable Phase 5 core is exposed by `src/features/simulation/core/index.ts`.
 It contains only typed contracts, invariant validation, and deterministic
 playback state transitions. Timing, rendering, animation, and domain algorithms
 remain outside the core.
+
+## Reference module boundary
+
+The Phase 6 singly linked list module lives in
+`src/features/simulation/linked-list`. Its state model, validation, code
+listings, and trace-producing algorithms are framework-independent and
+deterministic. They do not import React, Next.js, Motion, timers, or database
+code.
+
+The algorithm-agnostic React timer adapter lives in
+`src/features/simulation/react`. Shared playback, code, and explanation UI
+lives in `src/features/simulation/components`. The linked list renderer maps
+logical snapshots and semantic visual states to DOM and Motion transitions but
+contains no operation or pointer-rewiring logic. This preserves the dependency
+direction documented above.
+
+The `/visualizer/linked-list` route remains a Server Component entry point and
+introduces a narrow Client Component boundary for the interactive visualizer.
+Visualizer sessions are transient; Phase 6 adds no database schema, migration,
+or persistence behavior.
