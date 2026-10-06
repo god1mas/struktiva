@@ -99,3 +99,19 @@ panel, explanation component, content registry, quiz runner, and progress
 services. Its conceptual contiguous addresses are derived from the visible
 index and clearly labeled as simulated. Array content is source-controlled;
 Phase 8 adds no database schema or migration.
+
+## Stack module boundary
+
+The Phase 9 Stack domain lives in `src/features/simulation/stack`. It models a
+fixed-capacity Array-backed Stack as bottom-to-top logical items with stable
+identities; `TOP` is always derived as `items.length - 1`. Pure deterministic
+algorithms produce validated traces for Push, Pop, Peek, isEmpty, and isFull.
+Push and Pop transition items are explicit trace state rather than renderer-only
+effects.
+
+The dedicated vertical renderer maps those snapshots to semantic states and
+Motion layout only. It exposes Structure and Memory views, where addresses are
+conceptual values derived from `0xC100 + slot * 4` and explicitly labeled as
+simulated. The module reuses playback, synchronized code, explanation, content,
+quiz, and progress infrastructure. Phase 9 adds no package, database schema, or
+migration changes.

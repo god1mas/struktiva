@@ -102,4 +102,42 @@ describe("progress derivation", () => {
       quizAttemptCount: 1,
     });
   });
+
+  it("derives Stack progress independently with eleven manifest lessons", () => {
+    const stackLessons = getOrderedLessons("stack").map((lesson) => lesson.slug);
+    const empty = derive([], { moduleSlug: "stack" });
+    const partial = derive(stackLessons.slice(0, 4), {
+      moduleSlug: "stack",
+      scores: [50, 90, 70],
+      lastLessonSlug: "push",
+    });
+    const completed = derive(stackLessons, { moduleSlug: "stack", scores: [100] });
+
+    expect(empty).toMatchObject({
+      moduleSlug: "stack",
+      completedLessonCount: 0,
+      totalLessonCount: 11,
+      percentage: 0,
+      status: "not-started",
+    });
+    expect(partial).toMatchObject({
+      moduleSlug: "stack",
+      completedLessonCount: 4,
+      totalLessonCount: 11,
+      percentage: 36,
+      bestQuizScore: 90,
+      quizAttemptCount: 3,
+      lastLessonSlug: "push",
+    });
+    expect(completed).toMatchObject({ percentage: 100, status: "completed" });
+
+    const array = derive(["what-is-array"], { moduleSlug: "array", scores: [80] });
+    expect(array).toMatchObject({
+      moduleSlug: "array",
+      completedLessonCount: 1,
+      totalLessonCount: 12,
+      bestQuizScore: 80,
+      quizAttemptCount: 1,
+    });
+  });
 });

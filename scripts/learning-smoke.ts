@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import { arrayQuiz } from "../src/content/quizzes/array";
 import { linkedListQuiz } from "../src/content/quizzes/linked-list";
+import { stackQuiz } from "../src/content/quizzes/stack";
 import { createProgressService } from "../src/features/progress/server/progress-service-core";
 import { createQuizPersistence } from "../src/features/quiz/server/quiz-persistence-core";
 import { createQuizSubmissionHandler } from "../src/features/quiz/server/submission-handler";
@@ -60,6 +61,13 @@ async function main() {
   });
   if (arrayLessonCount !== 1) throw new Error("Array lesson progress was not persisted independently.");
 
+  await progressService.startLesson(fixtureUserId, "stack", "lifo-principle");
+  await progressService.completeLesson(fixtureUserId, "stack", "lifo-principle");
+  const stackLessonCount = await prisma.lessonProgress.count({
+    where: { userId: fixtureUserId, moduleSlug: "stack", lessonSlug: "lifo-principle" },
+  });
+  if (stackLessonCount !== 1) throw new Error("Stack lesson progress was not persisted independently.");
+
   const guestHandler = createQuizSubmissionHandler({
     getAuthenticatedUserId: async () => null,
     persistAttempt,
@@ -102,6 +110,18 @@ async function main() {
   ) {
     throw new Error("Array quiz history was not persisted independently.");
   }
+  const stackResponse = await authenticatedHandler(quizRequest(stackQuiz), "stack");
+  if (!stackResponse.ok) throw new Error("Authenticated Stack quiz submission failed.");
+  const stackAttempts = await prisma.quizAttempt.findMany({
+    where: { userId: fixtureUserId, moduleSlug: "stack" },
+    include: { answers: true },
+  });
+  if (
+    stackAttempts.length !== 1 ||
+    stackAttempts[0]!.answers.length !== stackQuiz.questions.length
+  ) {
+    throw new Error("Stack quiz history was not persisted independently.");
+  }
   const summary = await progressService.getModuleLearningProgress(
     fixtureUserId,
     "linked-list",
@@ -120,6 +140,18 @@ async function main() {
     arraySummary.quizAttemptCount !== 1
   ) {
     throw new Error("Derived Array progress or quiz summary is incorrect.");
+  }
+  const stackSummary = await progressService.getModuleLearningProgress(
+    fixtureUserId,
+    "stack",
+  );
+  if (
+    stackSummary.completedLessonCount !== 1 ||
+    stackSummary.totalLessonCount !== 11 ||
+    stackSummary.bestQuizScore !== 100 ||
+    stackSummary.quizAttemptCount !== 1
+  ) {
+    throw new Error("Derived Stack progress or quiz summary is incorrect.");
   }
   console.log("Learning progress and quiz smoke check passed.");
 }

@@ -1,8 +1,8 @@
 # Learning Progress and Quiz Infrastructure
 
 Phase 7 adds reusable learning metadata, progress persistence, and secure quiz
-submission. Linked List and Array are registered learning modules. Their
-manifests contain 18 and 12 stable lesson slugs respectively, grouped into
+submission. Linked List, Array, and Stack are registered learning modules. Their
+manifests contain 18, 12, and 11 stable lesson slugs respectively, grouped into
 module-specific chapters. Static lesson and quiz content stays in source
 control rather than the database.
 
@@ -50,4 +50,6 @@ Better Auth and Prisma adapters remain server-only. Testable application
 factories accept explicit persistence/session dependencies, while guarded app
 adapters bind the production Prisma client. `/learn/linked-list` renders the
 manifest, `/learn/linked-list/quiz` passes only public quiz data to the client
-runner, and `/progress` renders guest guidance or authenticated summaries.
+runner, and `/progress` renders guest guidance or authenticated summaries. The
+same generic registry, progress derivation, secure scoring, and persistence path
+serves all three modules independently.
