@@ -40,3 +40,10 @@ src/
 ```
 
 Only directories with a current implementation are committed. Future code must follow the dependency and boundary rules above.
+
+## Simulation core
+
+The reusable Phase 5 core is exposed by `src/features/simulation/core/index.ts`.
+It contains only typed contracts, invariant validation, and deterministic
+playback state transitions. Timing, rendering, animation, and domain algorithms
+remain outside the core.
